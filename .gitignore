@@ -1,0 +1,7 @@
+# the usual
+.vscode/
+build/
+CMakeLists.txt.user
+
+# my personal todo
+TODO.txt
