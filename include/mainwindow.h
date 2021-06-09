@@ -45,11 +45,13 @@ private:
     SerialConfigWindow* serialconfigwindow;
     std::chrono::high_resolution_clock _clock;
     std::chrono::time_point<std::chrono::high_resolution_clock> _poll_start_time, _poll_stop_time;
+    bool _can_record;
     bool _recording;
     bool _run_dispatch;
     std::thread _dispath_thread;
     size_t _volatile_data_size;
 
+    std::ofstream outputFile;
     std::mutex logMutex;
 
     float xIndex;
@@ -65,7 +67,7 @@ private:
 
     void dispatchDataQueue();
     std::queue<std::pair<float, float>> processDataQueue();
-    void recordDataChunk(std::ofstream& outputFile, std::queue<std::pair<float, float>>);
+    void recordDataChunk(std::queue<std::pair<float, float>>);
     void plotDataFromFile();
     void setupStatusBar();
 

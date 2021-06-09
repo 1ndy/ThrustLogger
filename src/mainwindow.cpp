@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->serialconfigwindow = new SerialConfigWindow();
     this->ui->recordButton->setEnabled(false);
+    this->_can_record = false;
     this->_recording = false;
     this->_volatile_data_size = 0;
 
@@ -127,7 +128,7 @@ void MainWindow::setSerialDevice(SerialDevice* sd) {
         if(this->filename != "") {
             setEnableRecording(true);
         }
-        this->setEnableFileSelection(false);
+        //this->setEnableFileSelection(false);
     }
 }
 
@@ -139,19 +140,17 @@ void MainWindow::updateFilename() {
 void MainWindow::toggleRecord() {
     if(this->ui->recordButton->isChecked()) {
         ui->configureCOMButton->setEnabled(false);
+        this->setEnableFileSelection(false);
         this->ui->recordButton->setText("Recording");
         ui->statusbar->showMessage("Recording");
         std::cout << "recording" << std::endl;
         this->_recording = true;
         this->_poll_start_time = this->_clock.now();
     } else {
+        this->_recording = false;
         ui->configureCOMButton->setEnabled(true);
         this->ui->recordButton->setText("Record");
-        this->_recording = false;
-        std::cout << "stopped" << std::endl;
-        setEnableRecording(false);
-        this->_run_dispatch = false;
-        //this->plotDataFromFile();
+        ui->statusbar->clearMessage();
     }
 }
 
@@ -184,7 +183,16 @@ void MainWindow::selectLogFileLocation() {
     qfd.selectFile(QString::fromStdString(proposedFilename));
     if(qfd.exec()) {
         this->filename = qfd.selectedFiles().at(0).toStdString();
-        ui->filenameLineEdit->setText(QString::fromStdString(this->filename));
+        this->outputFile.open(this->filename);
+        if(this->outputFile.is_open()) {
+            ui->filenameLineEdit->setText(QString::fromStdString(this->filename));
+            this->_can_record = true;
+            this->setEnableRecording(true);
+        } else {
+            QMessageBox qbx(QMessageBox::Icon::Warning, QString::fromStdString("File Error"), QString::fromStdString("Filecould not be opened"));
+            qbx.exec();
+            this->filename = "";
+        }
     }
 }
 
@@ -233,7 +241,7 @@ std::string MainWindow::formatNumBytes() {
 
 }
 
-void MainWindow::recordDataChunk(std::ofstream& outputFile, std::queue<std::pair<float, float>> processedData) {
+void MainWindow::recordDataChunk(std::queue<std::pair<float, float>> processedData) {
     std::ostringstream chunk;
     while(!processedData.empty()) {
         chunk << processedData.front().second << std::endl;
@@ -255,17 +263,11 @@ void MainWindow::addDataToPlot(std::queue<std::pair<float,float>> points) {
 }
 
 void MainWindow::dispatchDataQueue() {
-    std::ofstream outputFile;
     logMutex.lock();
-    bool can_record = true;
-    outputFile.open(this->filename, std::ios::app);
-    if(!outputFile.is_open()) {
-        std::cout << "Could not open " << this->filename << std::endl;
-        can_record = false;
-    }
-    AveragerQueue<int> aq(10, 0);
+    AveragerQueue<size_t> aq(10, 0);
     while(this->_run_dispatch) {
         if(this->sd) {
+            // prevent system from sleeping while polling
             SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             auto processedData = this->processDataQueue();
@@ -278,8 +280,8 @@ void MainWindow::dispatchDataQueue() {
                 ui->dataRateLabel->setText(dataRate + QString::fromStdString(" Hz"));
                 ui->sampleValueLabel->setText(sampleValue);
                 //plot data, save if recording
-                if(can_record && this->_recording) {
-                    this->recordDataChunk(outputFile, processedData);
+                if(this->_can_record && this->_recording) {
+                    this->recordDataChunk(processedData);
                 }
                 //this->addDataToPlot(processedData);
             }

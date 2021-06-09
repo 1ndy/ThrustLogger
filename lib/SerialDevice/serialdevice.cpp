@@ -104,7 +104,7 @@ void SerialDevice::stopPolling() {
         this->_run_poll = false;
         this->_poll_thread.join();
         this->_poll_stop_time = this->_clock.now();
-        this->_record_duration = std::chrono::duration_cast<std::chrono::seconds>(this->_poll_stop_time - this->_poll_start_time).count();
+        this->_record_duration = std::chrono::duration_cast<std::chrono::milliseconds>(this->_poll_stop_time - this->_poll_start_time).count() / 1000.0f;
     }
 }
 
