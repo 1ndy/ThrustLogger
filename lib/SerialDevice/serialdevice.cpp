@@ -15,12 +15,12 @@ SerialDevice::SerialDevice(std::string com_port, DWORD baud_rate)
         throw SerialDeviceCouldNotConnect();
     }
 
-    _serialParams = {0};
     _serialParams.DCBlength = sizeof(_serialParams);
     _serialParams.BaudRate = baud_rate;
     _serialParams.ByteSize = 8;
     _serialParams.StopBits = ONESTOPBIT;
-    _serialParams.Parity = EVENPARITY;
+    _serialParams.Parity = NOPARITY;
+    result = SetCommState(_hSerial, &_serialParams);
     if(!result) {
         std::cout << "throwing error " << GetLastError() << std::endl;
         throw SerialDeviceCouldNotConfigure();
@@ -50,15 +50,15 @@ void SerialDevice::start() {
 
 int SerialDevice::getBaudRate() {
     switch(this->_serialParams.BaudRate) {
-        case BAUD_9600:
+        case CBR_9600:
             return 9600; break;
-        case BAUD_19200:
+        case CBR_19200:
             return 19200; break;
-        case BAUD_38400:
+        case CBR_38400:
             return 38400; break;
-        case BAUD_57600:
+        case CBR_57600:
             return 57600; break;
-        case BAUD_115200:
+        case CBR_115200:
             return 115200; break;
         default:
             std::cout << this->_baud_rate << std::endl;
@@ -84,7 +84,7 @@ void SerialDevice::poll(int buffsize) {
         } else {
             memcpy(nums, buff, buffsize);
             this->_queueMutex.lock();
-                for(int i = 0; i < bytesRead / ARDUINO_FLOAT_SIZE_BYTES; i++) {
+                for(DWORD i = 0; i < bytesRead / ARDUINO_FLOAT_SIZE_BYTES; i++) {
                     this->_dataQueue.push(std::pair<std::chrono::time_point<std::chrono::high_resolution_clock>, float>(this->_clock.now(), nums[i]));
                 }
             this->_queueMutex.unlock();

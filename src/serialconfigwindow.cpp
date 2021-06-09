@@ -11,14 +11,14 @@ SerialConfigWindow::SerialConfigWindow(QWidget *parent)
     this->setWindowTitle("Configure Serial Device");
     ui->configureButton->setEnabled(false);
 
-    ui->baudRateComboBox->addItem("9600", QVariant((qulonglong)BAUD_9600));
-    ui->baudRateComboBox->addItem("19200", QVariant((qulonglong)BAUD_19200));
-    ui->baudRateComboBox->addItem("38400", QVariant((qulonglong)BAUD_38400));
-    ui->baudRateComboBox->addItem("57600", QVariant((qulonglong)BAUD_57600));
-    ui->baudRateComboBox->addItem("115200", QVariant((qulonglong)BAUD_115200));
+    ui->baudRateComboBox->addItem("9600", QVariant((qulonglong)CBR_9600));
+    ui->baudRateComboBox->addItem("19200", QVariant((qulonglong)CBR_19200));
+    ui->baudRateComboBox->addItem("38400", QVariant((qulonglong)CBR_38400));
+    ui->baudRateComboBox->addItem("57600", QVariant((qulonglong)CBR_57600));
+    ui->baudRateComboBox->addItem("115200", QVariant((qulonglong)CBR_115200));
 
     this->_baud_rate_int = 9600;
-    this->_baud_rate_define = BAUD_9600;
+    this->_baud_rate_define = CBR_9600;
 
     QObject::connect(ui->cancelButton, &QPushButton::clicked, this, &SerialConfigWindow::close);
     QObject::connect(ui->configureButton, &QPushButton::clicked, this, &SerialConfigWindow::emitConfigParams);
