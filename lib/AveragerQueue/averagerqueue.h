@@ -19,8 +19,6 @@ private:
     T sum();
 };
 
-#include "averagerqueue.h"
-
 template <class T>
 AveragerQueue<T>::AveragerQueue(int size, T zero)
 {
