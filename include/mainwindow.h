@@ -28,6 +28,9 @@ public:
 
     void showSerialConfigWindow();
 
+signals:
+    void newDataRecorded();
+
 private slots:
     void setSerialDevice(SerialDevice* sd);
     void toggleRecord();
@@ -38,6 +41,8 @@ private slots:
 
     void setEnableFileSelection(bool enabled);
     void setEnableRecording(bool enabled);
+
+    void updateTimeAndNumBytes();
 
 private:
     Ui::MainWindow *ui;

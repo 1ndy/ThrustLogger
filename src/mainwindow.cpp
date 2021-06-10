@@ -48,10 +48,8 @@ MainWindow::MainWindow(QWidget *parent)
     //menu bar
     QObject::connect(ui->actionConfigure_Serial, &QAction::triggered, this, &MainWindow::showSerialConfigWindow);
 
-    QTimer *timer = new QTimer(this);
-    QObject::connect(timer, &QTimer::timeout, this, &MainWindow::updateRecordTime);
-    timer->start(1);
-
+    //ui updates
+    QObject::connect(this, &MainWindow::newDataRecorded, this, &MainWindow::updateTimeAndNumBytes);
 }
 
 MainWindow::~MainWindow()
@@ -189,7 +187,7 @@ void MainWindow::selectLogFileLocation() {
             this->_can_record = true;
             this->setEnableRecording(true);
         } else {
-            QMessageBox qbx(QMessageBox::Icon::Warning, QString::fromStdString("File Error"), QString::fromStdString("Filecould not be opened"));
+            QMessageBox qbx(QMessageBox::Icon::Warning, QString::fromStdString("File Error"), QString::fromStdString("File could not be opened"));
             qbx.exec();
             this->filename = "";
         }
@@ -235,10 +233,15 @@ std::string MainWindow::formatNumBytes() {
     } else if(i == 1){
         sprintf(buf, "%.2f %s", count, suffixes[i].c_str());
     } else {
-       sprintf(buf, "%.3f %s", count, suffixes[i].c_str());
+        sprintf(buf, "%.3f %s", count, suffixes[i].c_str());
     }
     return std::string(buf);
 
+}
+
+void MainWindow::updateTimeAndNumBytes() {
+    updateRecordTime();
+    ui->numBytesLabel->setText(QString::fromStdString(this->formatNumBytes()));
 }
 
 void MainWindow::recordDataChunk(std::queue<std::pair<float, float>> processedData) {
@@ -250,7 +253,7 @@ void MainWindow::recordDataChunk(std::queue<std::pair<float, float>> processedDa
     }
     outputFile << chunk.str();
     this->bytesOfData += chunk.str().size();
-    ui->numBytesLabel->setText(QString::fromStdString(this->formatNumBytes()));
+    emit newDataRecorded();
     if(this->_volatile_data_size >= 400) {
         outputFile.flush();
         std::cout << "saved " << this->_volatile_data_size << " points" << std::endl;
