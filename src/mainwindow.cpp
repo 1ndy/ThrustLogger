@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->ui->recordButton->setEnabled(false);
     this->_can_record = false;
     this->_recording = false;
+    this->_run_dispatch = false;
     this->_volatile_data_size = 0;
 
     this->sd = NULL;
@@ -127,7 +128,6 @@ void MainWindow::setSerialDevice(SerialDevice* sd) {
         if(this->filename != "") {
             setEnableRecording(true);
         }
-        //this->setEnableFileSelection(false);
     }
 }
 
@@ -186,7 +186,9 @@ void MainWindow::selectLogFileLocation() {
         if(this->outputFile.is_open()) {
             ui->filenameLineEdit->setText(QString::fromStdString(this->filename));
             this->_can_record = true;
-            this->setEnableRecording(true);
+            if(this->_run_dispatch) {
+                this->setEnableRecording(true);
+            }
         } else {
             QMessageBox qbx(QMessageBox::Icon::Warning, QString::fromStdString("File Error"), QString::fromStdString("File could not be opened"));
             qbx.exec();
