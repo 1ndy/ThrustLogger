@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     //ui updates
     QObject::connect(this, &MainWindow::newDataRecorded, this, &MainWindow::updateTimeAndNumBytes);
+    QObject::connect(this, &MainWindow::newDataRateAndValue, this, &MainWindow::updateDataRateAndValue);
 }
 
 MainWindow::~MainWindow()
@@ -244,6 +245,14 @@ void MainWindow::updateTimeAndNumBytes() {
     ui->numBytesLabel->setText(QString::fromStdString(this->formatNumBytes()));
 }
 
+void MainWindow::updateDataRateAndValue(int rate, float val) {
+    QString dataRate = QString::number(rate);
+    QString sampleValue;
+    sampleValue.setNum(val, 'f', 3);
+    ui->dataRateLabel->setText(dataRate + QString::fromStdString(" Hz"));
+    ui->sampleValueLabel->setText(sampleValue);
+}
+
 void MainWindow::recordDataChunk(std::queue<std::pair<float, float>> processedData) {
     std::ostringstream chunk;
     while(!processedData.empty()) {
@@ -277,11 +286,7 @@ void MainWindow::dispatchDataQueue() {
             if(processedData.size() > 0) {
                 aq.add(processedData.size());
                 int projectedDataRate = aq.average() * 10;
-                QString dataRate = QString::number(projectedDataRate);
-                QString sampleValue;
-                sampleValue.setNum(processedData.front().second, 'f', 3);
-                ui->dataRateLabel->setText(dataRate + QString::fromStdString(" Hz"));
-                ui->sampleValueLabel->setText(sampleValue);
+                emit newDataRateAndValue(projectedDataRate, processedData.front().second);
                 //plot data, save if recording
                 if(this->_can_record && this->_recording) {
                     this->recordDataChunk(processedData);

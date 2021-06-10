@@ -30,6 +30,7 @@ public:
 
 signals:
     void newDataRecorded();
+    void newDataRateAndValue(int rate, float val);
 
 private slots:
     void setSerialDevice(SerialDevice* sd);
@@ -43,6 +44,7 @@ private slots:
     void setEnableRecording(bool enabled);
 
     void updateTimeAndNumBytes();
+    void updateDataRateAndValue(int rate, float val);
 
 private:
     Ui::MainWindow *ui;
