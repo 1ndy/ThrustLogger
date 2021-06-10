@@ -96,6 +96,8 @@ void MainWindow::showSerialConfigWindow() {
         }
     }
 
+    this->serialconfigwindow->rescanForComPorts();
+
     // clean up an old connection
     this->_run_dispatch = false;
     if(this->_dispath_thread.joinable()) {

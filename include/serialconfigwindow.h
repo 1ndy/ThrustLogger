@@ -30,6 +30,8 @@ signals:
 private slots:
     void updateCOMPort(int index);
     void updateBaudRate(QString text);
+
+public slots:
     void rescanForComPorts();
 
 private:
