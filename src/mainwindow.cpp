@@ -82,6 +82,10 @@ void MainWindow::setupStatusBar() {
 
 void MainWindow::showSerialConfigWindow() {
     ui->statusbar->showMessage("Configuring Serial Device");
+    
+    // since user can choose file after configuring COM port
+    // this isn't needed
+    /*
     if(this->filename == "") {
         QMessageBox qbx(this);
         qbx.setWindowTitle("Warning");
@@ -95,6 +99,7 @@ void MainWindow::showSerialConfigWindow() {
             return;
         }
     }
+    */
 
     this->serialconfigwindow->rescanForComPorts();
 
