@@ -1,5 +1,7 @@
 #include <QTimer>
 
+#include <filesystem>
+
 #include "mainwindow.h"
 #include "../ui/ui_mainwindow.h"
 #include "serialdevice.h"
@@ -188,7 +190,22 @@ void MainWindow::selectLogFileLocation() {
     qfd.setDirectory(QString::fromStdString(proposedPath));
     qfd.selectFile(QString::fromStdString(proposedFilename));
     if(qfd.exec()) {
-        this->filename = qfd.selectedFiles().at(0).toStdString();
+        auto filepath = std::filesystem::path(qfd.selectedFiles().at(0).toStdString());
+
+        // check for existing log file
+        if(std::filesystem::exists(filepath)) {
+            QMessageBox qbx(QMessageBox::Icon::Warning, QString::fromStdString("File Error"), QString::fromStdString("File already exists. Overwrite?"));
+            qbx.addButton(QMessageBox::Yes);
+            qbx.addButton(QMessageBox::No);
+            qbx.setDefaultButton(QMessageBox::No);
+            qbx.exec();
+            if(qbx.result() != QMessageBox::Yes) {
+                return;
+            }
+        }
+
+        // make sure we can actually use the file
+        this->filename = filepath.string();
         this->outputFile.open(this->filename);
         if(this->outputFile.is_open()) {
             ui->filenameLineEdit->setText(QString::fromStdString(this->filename));
