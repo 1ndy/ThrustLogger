@@ -15,7 +15,11 @@ ThrustLogger is custom built load cell-based thrust measurement platform used to
 This tool is designed to read load measurements from a Sparkfun 
 [HX711](https://www.sparkfun.com/products/13879) through an arduino via serial. I use a sparkfun redboard to communicate with the load cell amplifier but almost any board would work just fine. Here is what it looks like.
 
+![](resources/loadcell_measurement_circuit.png)
+
+And in real life
 ![](resources/hardware.jpg)
+
 
 The black wire coming out of the HX711 goes to the actual [load cell](https://www.sparkfun.com/products/13331) (I know it's orange on the site, mine isn't). The resistence value is measured and converted on the HX711 and is made accesisble over I<sup>2</sup>C. The arduino reads this value and prints it in binary to the USB serial.
 
